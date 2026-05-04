@@ -5,7 +5,7 @@ export interface FontRuntimeConfig {
   base?: string | undefined;
 }
 
-const CONFIG_SYMBOL = Symbol.for("astro-fontkit.runtime-config");
+const CONFIG_SYMBOL = Symbol.for("astro-typekit.runtime-config");
 
 type GlobalWithFontConfig = typeof globalThis & {
   [CONFIG_SYMBOL]?: FontRuntimeConfig;

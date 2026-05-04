@@ -23,7 +23,7 @@ describe("local font asset transform", () => {
   it("rewrites string src values in JavaScript modules and preserves existing query strings", () => {
     const transformed = transformLocalFontAssets(
       [
-        'import localFont from "astro-fontkit/local";',
+        'import localFont from "astro-typekit/local";',
         "export const mono = localFont({",
         '  src: "../fonts/Mono.woff2?v=1",',
         "});",
@@ -33,6 +33,24 @@ describe("local font asset transform", () => {
 
     expect(transformed?.startsWith('import __astroFontAsset0 from "../fonts/Mono.woff2?v=1&url";')).toBe(true);
     expect(transformed).toContain("src: __astroFontAsset0");
+  });
+
+  it("does not rewrite unrelated font-like properties outside localFont calls", () => {
+    const transformed = transformLocalFontAssets(
+      [
+        'import typekit from "astro/font/local";',
+        'const metadata = { src: "./fonts/OpenGraph.woff2" };',
+        "const brand = typekit({",
+        '  src: "./fonts/Brand.woff2",',
+        "});",
+      ].join("\n"),
+      "/project/src/fonts.ts",
+    );
+
+    expect(transformed).toContain('const metadata = { src: "./fonts/OpenGraph.woff2" };');
+    expect(transformed).toContain('import __astroFontAsset0 from "./fonts/Brand.woff2?url";');
+    expect(transformed).toContain("src: __astroFontAsset0");
+    expect(transformed).not.toContain("OpenGraph.woff2?url");
   });
 
   it("ignores code without local font imports or without static relative font paths", () => {
@@ -65,11 +83,11 @@ describe("local font asset transform", () => {
       options?: { ssr?: boolean },
     ) => string | undefined;
 
-    const localId = resolveId.call(context, "astro-fontkit/local");
+    const localId = resolveId.call(context, "astro-typekit/local");
     const googleId = resolveId.call(context, "astro/font/google");
 
-    expect(localId).toBe("\0astro-fontkit/local");
-    expect(googleId).toBe("\0astro-fontkit/google");
+    expect(localId).toBe("\0astro-typekit/local");
+    expect(googleId).toBe("\0astro-typekit/google");
 
     const localModule = await load.call(context, localId!);
     const googleModule = await load.call(context, googleId!);
@@ -99,6 +117,7 @@ describe("local font asset transform", () => {
     expect(googleModule).toContain("astro/font/google can only be called");
     expect(googleModule).toContain("export function createGoogleFont");
     expect(googleModule).toContain("export const Inter");
+    expect(googleModule).toContain("export const Red_Hat_Text");
     expect(googleModule).not.toContain("/pkg/dist/google.js");
   });
 });

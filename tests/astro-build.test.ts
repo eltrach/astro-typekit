@@ -13,7 +13,7 @@ describe("Astro integration", () => {
   it("builds Astro pages using astro/font/local with isolated emitted font assets", async () => {
     await execFileAsync("npm", ["run", "build"], { cwd: root });
 
-    const fixture = await mkdtemp(join(tmpdir(), "astro-fontkit-fixture-"));
+    const fixture = await mkdtemp(join(tmpdir(), "astro-typekit-fixture-"));
 
     try {
       const srcDir = join(fixture, "src", "pages");
@@ -64,14 +64,14 @@ describe("Astro integration", () => {
       const html = await readFile(htmlPath, "utf8");
       const aboutHtml = await readFile(aboutHtmlPath, "utf8");
 
-      expect(html).toContain("data-astro-fontkit");
+      expect(html).toContain("data-astro-typekit");
       expect(html).toContain("rel=\"preload\"");
       expect(html).toMatch(/\/_astro\/Brand\.[\w-]+\.woff2/);
       expect(html).toContain("--font-brand");
       expect(html).not.toContain("--font-alt");
       expect(html).not.toContain("Alt.");
 
-      expect(aboutHtml).toContain("data-astro-fontkit");
+      expect(aboutHtml).toContain("data-astro-typekit");
       expect(aboutHtml).toMatch(/\/_astro\/Alt\.[\w-]+\.woff2/);
       expect(aboutHtml).toContain("--font-alt");
       expect(aboutHtml).not.toContain("--font-brand");

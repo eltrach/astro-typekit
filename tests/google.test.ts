@@ -9,7 +9,7 @@ describe("google fonts", () => {
   beforeEach(async () => {
     vi.restoreAllMocks();
     clearFontCss();
-    process.env.ASTRO_FONT_CACHE_DIR = await mkdtemp(join(tmpdir(), "astro-fontkit-google-cache-"));
+    process.env.ASTRO_FONT_CACHE_DIR = await mkdtemp(join(tmpdir(), "astro-typekit-google-cache-"));
   });
 
   afterEach(async () => {
@@ -20,7 +20,7 @@ describe("google fonts", () => {
     clearFontCss();
   });
 
-  it("returns a Next-like font object and keeps Google font URLs external by default", async () => {
+  it("returns a Astro font font object and keeps Google font URLs external by default", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async (url: string | URL) => {

@@ -1,11 +1,12 @@
 import type { Plugin } from "vite";
 import type { FontRuntimeConfig } from "./runtime/config.js";
 
-const LOCAL_FONT_IMPORT_RE = /from\s+["'](?:astro\/font\/local|astro-fontkit\/local)["']/;
+const LOCAL_FONT_IMPORT_RE =
+  /import\s+([A-Za-z_$][\w$]*)\s+from\s+["'](?:astro\/font\/local|astro-typekit\/local)["']/g;
 const FONT_SOURCE_RE =
   /(\b(?:src|path)\s*:\s*)(["'])(\.{1,2}\/[^"']+\.(?:woff2?|ttf|otf)(?:\?[^"']*)?)\2/g;
-const VIRTUAL_LOCAL_ID = "\0astro-fontkit/local";
-const VIRTUAL_GOOGLE_ID = "\0astro-fontkit/google";
+const VIRTUAL_LOCAL_ID = "\0astro-typekit/local";
+const VIRTUAL_GOOGLE_ID = "\0astro-typekit/google";
 const GOOGLE_FONT_EXPORTS = [
   "Inter",
   "Roboto",
@@ -59,6 +60,7 @@ const GOOGLE_FONT_EXPORTS = [
   "Outfit",
   "Plus_Jakarta_Sans",
   "Red_Hat_Display",
+  "Red_Hat_Text",
 ];
 
 function fontAssetSpecifier(specifier: string): string {
@@ -85,24 +87,144 @@ function insertImports(code: string, imports: string[], id: string): string {
 }
 
 export function transformLocalFontAssets(code: string, id: string): string | undefined {
-  if (!LOCAL_FONT_IMPORT_RE.test(code)) {
+  const localFontNames = Array.from(code.matchAll(LOCAL_FONT_IMPORT_RE), (match) => match[1]).filter(
+    (name): name is string => Boolean(name),
+  );
+
+  if (localFontNames.length === 0) {
     return undefined;
   }
 
   const imports: string[] = [];
   let assetIndex = 0;
-  const transformed = code.replace(FONT_SOURCE_RE, (match, prefix: string, _quote: string, source: string) => {
+  const rewriteFontSources = (value: string) => value.replace(FONT_SOURCE_RE, (match, prefix: string, _quote: string, source: string) => {
     const variableName = `__astroFontAsset${assetIndex}`;
     assetIndex += 1;
     imports.push(`import ${variableName} from ${JSON.stringify(fontAssetSpecifier(source))};`);
     return `${prefix}${variableName}`;
   });
+  let transformed = code;
+
+  for (const localFontName of localFontNames) {
+    transformed = transformCallArguments(transformed, localFontName, rewriteFontSources);
+  }
 
   if (imports.length === 0) {
     return undefined;
   }
 
   return insertImports(transformed, imports, id);
+}
+
+function transformCallArguments(
+  code: string,
+  callee: string,
+  transformArguments: (value: string) => string,
+): string {
+  let cursor = 0;
+  let nextCode = "";
+
+  while (cursor < code.length) {
+    const callStart = findNextCall(code, callee, cursor);
+
+    if (callStart === -1) {
+      nextCode += code.slice(cursor);
+      break;
+    }
+
+    const argsStart = code.indexOf("(", callStart + callee.length);
+    const argsEnd = argsStart === -1 ? -1 : findMatchingParen(code, argsStart);
+
+    if (argsStart === -1 || argsEnd === -1) {
+      nextCode += code.slice(cursor);
+      break;
+    }
+
+    nextCode += code.slice(cursor, argsStart + 1);
+    nextCode += transformArguments(code.slice(argsStart + 1, argsEnd));
+    cursor = argsEnd;
+  }
+
+  return nextCode;
+}
+
+function findNextCall(code: string, callee: string, from: number): number {
+  const callPattern = new RegExp(`\\b${escapeRegExp(callee)}\\s*\\(`, "g");
+  callPattern.lastIndex = from;
+
+  const match = callPattern.exec(code);
+  return match?.index ?? -1;
+}
+
+function findMatchingParen(code: string, openIndex: number): number {
+  let depth = 0;
+  let quote: string | undefined;
+  let inLineComment = false;
+  let inBlockComment = false;
+
+  for (let index = openIndex; index < code.length; index += 1) {
+    const char = code[index];
+    const next = code[index + 1];
+    const previous = code[index - 1];
+
+    if (inLineComment) {
+      if (char === "\n") {
+        inLineComment = false;
+      }
+      continue;
+    }
+
+    if (inBlockComment) {
+      if (char === "*" && next === "/") {
+        inBlockComment = false;
+        index += 1;
+      }
+      continue;
+    }
+
+    if (quote) {
+      if (char === quote && previous !== "\\") {
+        quote = undefined;
+      }
+      continue;
+    }
+
+    if (char === "/" && next === "/") {
+      inLineComment = true;
+      index += 1;
+      continue;
+    }
+
+    if (char === "/" && next === "*") {
+      inBlockComment = true;
+      index += 1;
+      continue;
+    }
+
+    if (char === '"' || char === "'" || char === "`") {
+      quote = char;
+      continue;
+    }
+
+    if (char === "(") {
+      depth += 1;
+      continue;
+    }
+
+    if (char === ")") {
+      depth -= 1;
+
+      if (depth === 0) {
+        return index;
+      }
+    }
+  }
+
+  return -1;
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 export interface AstroFontVitePluginOptions {
@@ -113,7 +235,7 @@ export interface AstroFontVitePluginOptions {
 }
 
 function runtimeConfigCode(config: FontRuntimeConfig): string {
-  return `globalThis[Symbol.for("astro-fontkit.runtime-config")] = ${JSON.stringify(config)};`;
+  return `globalThis[Symbol.for("astro-typekit.runtime-config")] = ${JSON.stringify(config)};`;
 }
 
 function clientFontModuleCode(kind: "google" | "local"): string {
@@ -141,12 +263,12 @@ export function astroFontVitePlugin(options: AstroFontVitePluginOptions): Plugin
   const googleIds = new Set(["astro/font/google"]);
 
   if (options.includePackageAliases) {
-    localIds.add("astro-fontkit/local");
-    googleIds.add("astro-fontkit/google");
+    localIds.add("astro-typekit/local");
+    googleIds.add("astro-typekit/google");
   }
 
   return {
-    name: "astro-fontkit:local-assets",
+    name: "astro-typekit:local-assets",
     enforce: "pre",
     resolveId(id) {
       if (localIds.has(id)) {

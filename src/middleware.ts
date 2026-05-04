@@ -1,6 +1,6 @@
 import { runWithFontAssets } from "./runtime/registry.js";
 
-const STYLE_MARKER = "<!--astro-fontkit-->";
+const STYLE_MARKER = "<!--astro-typekit-->";
 
 function isHtmlResponse(response: Response): boolean {
   return response.headers.get("content-type")?.includes("text/html") ?? false;
@@ -11,11 +11,11 @@ function injectStyle(html: string, css: string): string {
     return html;
   }
 
-  if (html.includes("data-astro-fontkit")) {
+  if (html.includes("data-astro-typekit")) {
     return html;
   }
 
-  const style = `<style data-astro-fontkit>${STYLE_MARKER}${css}</style>`;
+  const style = `<style data-astro-typekit>${STYLE_MARKER}${css}</style>`;
 
   if (html.includes("</head>")) {
     return html.replace("</head>", `${style}</head>`);

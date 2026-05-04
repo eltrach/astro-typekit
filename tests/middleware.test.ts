@@ -14,7 +14,7 @@ describe("middleware", () => {
       });
     });
 
-    await expect(response.text()).resolves.toContain("<style data-astro-fontkit>");
+    await expect(response.text()).resolves.toContain("<style data-astro-typekit>");
   });
 
   it("injects escaped preload links before font CSS", async () => {
@@ -36,7 +36,7 @@ describe("middleware", () => {
 
     expect(html).toContain('rel="preload"');
     expect(html).toContain('href="/_astro/font.woff2?x=1&amp;name=&quot;brand&quot;"');
-    expect(html.indexOf('rel="preload"')).toBeLessThan(html.indexOf("<style data-astro-fontkit>"));
+    expect(html.indexOf('rel="preload"')).toBeLessThan(html.indexOf("<style data-astro-typekit>"));
     expect(response.headers.has("content-length")).toBe(false);
   });
 
@@ -88,7 +88,7 @@ describe("middleware", () => {
       });
 
       return new Response(
-        '<html><head><link rel="preload" as="font" href="/_astro/font.woff2" crossorigin><style data-astro-fontkit></style></head></html>',
+        '<html><head><link rel="preload" as="font" href="/_astro/font.woff2" crossorigin><style data-astro-typekit></style></head></html>',
         {
           headers: {
             "content-type": "text/html",
@@ -99,7 +99,7 @@ describe("middleware", () => {
 
     const html = await response.text();
 
-    expect(html.match(/data-astro-fontkit/g)).toHaveLength(1);
+    expect(html.match(/data-astro-typekit/g)).toHaveLength(1);
     expect(html.match(/href="\/_astro\/font\.woff2"/g)).toHaveLength(1);
   });
 });

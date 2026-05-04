@@ -18,7 +18,7 @@ const WOFF2_USER_AGENT =
 const googleCssCache = new Map<string, Promise<string>>();
 
 function cacheDir(): string {
-  return process.env.ASTRO_FONT_CACHE_DIR ?? resolve(process.cwd(), "node_modules", ".cache", "astro-fontkit");
+  return process.env.ASTRO_FONT_CACHE_DIR ?? resolve(process.cwd(), "node_modules", ".cache", "astro-typekit");
 }
 
 async function readCachedCss(cacheKey: string): Promise<string | undefined> {

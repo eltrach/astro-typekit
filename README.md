@@ -1,16 +1,20 @@
-<h1 align="center">astro-fontkit</h1>
+<h1 align="center">astro-typekit</h1>
 
 <p align="center">
   Astro-native font loading for Google Fonts and local font files.
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/astro-fontkit"><img alt="npm" src="https://img.shields.io/npm/v/astro-fontkit?style=flat-square"></a>
+  <a href="https://www.npmjs.com/package/astro-typekit"><img alt="npm" src="https://img.shields.io/npm/v/astro-typekit?style=flat-square"></a>
   <img alt="Astro" src="https://img.shields.io/badge/Astro-%3E%3D5.0.0-ff5d01?style=flat-square">
   <img alt="License" src="https://img.shields.io/badge/license-MIT-111827?style=flat-square">
 </p>
 
-`astro-fontkit` gives Astro projects a small, typed font API at `astro/font/google` and
+<p align="center">
+  <a href="https://www.npmjs.com/package/astro-typekit">npm package</a>
+</p>
+
+`astro-typekit` gives Astro projects a small, typed font API at `astro/font/google` and
 `astro/font/local`. Add the integration once, import fonts directly inside your
 Astro components, and let the middleware inject the generated `@font-face` rules
 into the rendered page.
@@ -23,7 +27,7 @@ into the rendered page.
 - Generated class names and optional CSS variable classes
 - Local font files emitted through Vite/Astro as hashed assets when possible
 - Automatic font preloads for emitted local font files
-- Google Font CSS cached in `node_modules/.cache/astro-fontkit`
+- Google Font CSS cached in `node_modules/.cache/astro-typekit`
 - Google font loading strategies: keep fonts hosted by Google or inline them
 - Optional selector rules for app-wide font application
 - Type declarations injected automatically for Astro projects
@@ -31,7 +35,7 @@ into the rendered page.
 ## Install
 
 ```sh
-npm install astro-fontkit
+npm install astro-typekit
 ```
 
 ## Add The Integration
@@ -39,7 +43,7 @@ npm install astro-fontkit
 ```ts
 // astro.config.ts
 import { defineConfig } from "astro/config";
-import font from "astro-fontkit";
+import font from "astro-typekit";
 
 export default defineConfig({
   integrations: [font()],
@@ -225,7 +229,7 @@ custom property, read `family` for a resolved `font-family` value, or read
 
 ## How It Works
 
-`astro-fontkit` collects font usage while Astro renders, downloads and caches
+`astro-typekit` collects font usage while Astro renders, downloads and caches
 Google Font CSS when needed, optionally inlines Google font files, emits local
 font files as hashed assets, injects preload links for emitted local fonts, and
 appends the final CSS to the HTML response. Your components stay clean, and the

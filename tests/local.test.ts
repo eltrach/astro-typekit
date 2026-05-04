@@ -7,7 +7,7 @@ import { clearFontCss, collectFontAssets, collectFontCss } from "../src/runtime/
 
 const originalCwd = process.cwd();
 const fixtureDir = join(originalCwd, ".tmp-test-fonts");
-const runtimeConfigSymbol = Symbol.for("astro-fontkit.runtime-config");
+const runtimeConfigSymbol = Symbol.for("astro-typekit.runtime-config");
 
 describe("local fonts", () => {
   beforeEach(async () => {

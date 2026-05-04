@@ -1,13 +1,32 @@
 {
-  "name": "astro-fontkit",
-  "version": "0.1.0",
+  "name": "astro-typekit",
+  "version": "0.1.1",
   "description": "Astro-native font loading for Google Fonts and local font files.",
   "type": "module",
   "license": "MIT",
+  "author": "eltrach",
+  "homepage": "https://www.npmjs.com/package/astro-typekit",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eltrach/astro-typekit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/eltrach/astro-typekit/issues"
+  },
+  "keywords": [
+    "astro",
+    "astro-integration",
+    "fonts",
+    "google-fonts",
+    "local-fonts",
+    "typography",
+    "vite"
+  ],
   "sideEffects": false,
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "exports": {
     ".": {
@@ -31,6 +50,7 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "build": "tsup src/index.ts src/google.ts src/local.ts src/middleware.ts --format esm --dts --clean",
+    "prepublishOnly": "npm run build && npm run typecheck && npm test",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },

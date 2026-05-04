@@ -25,12 +25,12 @@ function distPath(file: string): string {
 function typeDeclarations(): string {
   return [
     'declare module "astro/font/google" {',
-    '  export * from "astro-fontkit/google";',
+    '  export * from "astro-typekit/google";',
     "}",
     "",
     'declare module "astro/font/local" {',
-    '  export { default } from "astro-fontkit/local";',
-    '  export * from "astro-fontkit/local";',
+    '  export { default } from "astro-typekit/local";',
+    '  export * from "astro-typekit/local";',
     "}",
     "",
   ].join("\n");
@@ -43,7 +43,7 @@ export default function astroFont(options: AstroFontIntegrationOptions = {}): As
   let currentBase: string | undefined;
 
   return {
-    name: "astro-fontkit",
+    name: "astro-typekit",
     hooks: {
       "astro:config:setup": ({ addMiddleware, command, updateConfig }) => {
         activeCommand = command;
